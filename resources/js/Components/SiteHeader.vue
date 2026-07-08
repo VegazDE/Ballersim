@@ -57,8 +57,8 @@ const logout = () => {
                     <Link href="/login" class="rounded-lg border border-zinc-400/40 px-3 py-2 text-sm font-semibold text-zinc-100 transition hover:border-zinc-300">
                         Login
                     </Link>
-                    <Link href="/register" class="rounded-lg bg-emerald-500 px-3 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400">
-                        Register
+                    <Link href="/#waitlist" class="rounded-lg bg-amber-400 px-3 py-2 text-sm font-semibold text-zinc-900 transition hover:bg-amber-300">
+                        Join Waitlist
                     </Link>
                 </template>
             </nav>

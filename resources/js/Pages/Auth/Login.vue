@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import AppFrame from '../../Layouts/AppFrame.vue';
 
 const form = useForm({
@@ -61,8 +61,7 @@ const submit = () => {
             </form>
 
             <p class="mt-5 text-sm text-zinc-300">
-                No account yet?
-                <Link href="/register" class="font-semibold text-emerald-700 hover:text-emerald-800">Create one</Link>
+                New signups are currently closed. Join the waitlist on the homepage for launch access.
             </p>
         </section>
     </AppFrame>
