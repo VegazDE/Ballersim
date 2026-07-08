@@ -19,10 +19,20 @@ class Team extends Model
         'name',
         'is_cpu',
         'division_name',
+        'formation',
+        'mentality',
+        'pressing',
+        'tempo',
+        'substitution_style',
+        'line_height',
     ];
 
     protected $casts = [
         'is_cpu' => 'boolean',
+        'pressing' => 'integer',
+        'tempo' => 'integer',
+        'substitution_style' => 'integer',
+        'line_height' => 'integer',
     ];
 
     public function club(): BelongsTo

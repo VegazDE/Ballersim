@@ -30,6 +30,8 @@ class Fixture extends Model
 
     protected $casts = [
         'kickoff_at' => 'datetime',
+        'match_report' => 'array',
+        'simulated_at' => 'datetime',
     ];
 
     public function season(): BelongsTo

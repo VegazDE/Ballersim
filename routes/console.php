@@ -222,3 +222,41 @@ Artisan::command('baller:simulate-fixtures {--season=} {--league=} {--division=}
 
     return self::SUCCESS;
 })->purpose('Simulate scheduled fixtures and write finished scores back to the database.');
+
+Artisan::command('baller:run-matchday {--season=} {--league=} {--division=} {--matchday=}', function (): int {
+    $seasonId = $this->option('season') !== null ? (int) $this->option('season') : null;
+    $leagueId = $this->option('league') !== null ? (int) $this->option('league') : null;
+    $divisionId = $this->option('division') !== null ? (int) $this->option('division') : null;
+    $matchday = $this->option('matchday') !== null ? (int) $this->option('matchday') : null;
+
+    $simulator = app(MatchSimulationService::class);
+    $result = $simulator->simulateMatchday($seasonId, $leagueId, $divisionId, $matchday);
+
+    if (($result['count'] ?? 0) === 0) {
+        $this->warn('No pending fixtures found for the selected scope.');
+
+        return self::SUCCESS;
+    }
+
+    $resolvedSeasonId = $result['season_id'] ?? $seasonId;
+    $resolvedMatchday = $result['matchday'] ?? $matchday;
+
+    if ($resolvedSeasonId !== null) {
+        $season = Season::query()->find($resolvedSeasonId);
+
+        if ($season && $season->status !== Season::STATUS_ACTIVE) {
+            $season->update(['status' => Season::STATUS_ACTIVE]);
+        }
+
+        if ($season && ! Fixture::query()->where('season_id', $season->id)->where('status', Fixture::STATUS_SCHEDULED)->exists()) {
+            $season->update([
+                'status' => Season::STATUS_FINISHED,
+                'ends_at' => now(),
+            ]);
+        }
+    }
+
+    $this->info(sprintf('Simulated matchday %s with %d fixture(s).', $resolvedMatchday ?? 'n/a', $result['count']));
+
+    return self::SUCCESS;
+})->purpose('Run the next pending matchday with tactical simulation, lineups, and substitutions.');
