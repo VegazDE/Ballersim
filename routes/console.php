@@ -7,6 +7,7 @@ use App\Models\League;
 use App\Models\Season;
 use App\Models\Team;
 use App\Services\TeamProvisioningService;
+use App\Services\MatchSimulationService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -206,3 +207,18 @@ Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-int
 
     return self::SUCCESS;
 })->purpose('Generate a full home/away season schedule for all divisions (default: one matchday per day).');
+
+Artisan::command('baller:simulate-fixtures {--season=} {--league=} {--division=} {--matchday=} {--limit=}', function (): int {
+    $seasonId = $this->option('season') !== null ? (int) $this->option('season') : null;
+    $leagueId = $this->option('league') !== null ? (int) $this->option('league') : null;
+    $divisionId = $this->option('division') !== null ? (int) $this->option('division') : null;
+    $matchday = $this->option('matchday') !== null ? (int) $this->option('matchday') : null;
+    $limit = $this->option('limit') !== null ? max(1, (int) $this->option('limit')) : null;
+
+    $simulator = app(MatchSimulationService::class);
+    $count = $simulator->simulatePendingFixtures($seasonId, $leagueId, $divisionId, $matchday, $limit);
+
+    $this->info("Simulated {$count} fixture(s).");
+
+    return self::SUCCESS;
+})->purpose('Simulate scheduled fixtures and write finished scores back to the database.');
