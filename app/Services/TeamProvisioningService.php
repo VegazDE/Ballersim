@@ -64,6 +64,8 @@ class TeamProvisioningService
                 'is_cpu' => false,
             ]);
 
+            $this->ensureTeamIdentity($team, false);
+
             $this->seedPlayersForTeam($team);
             $this->backfillPlayerNamesForTeam($team);
 
@@ -120,20 +122,7 @@ class TeamProvisioningService
                 $changed = false;
 
                 if ($this->shouldRenameTeam($team, $forceTeamRename)) {
-                    $identity = $this->generateTeamIdentity();
-
-                    $team->update([
-                        'name' => $identity['team_name'],
-                    ]);
-
-                    if ($team->club) {
-                        $team->club->update([
-                            'name' => $identity['club_name'],
-                            'short_name' => $identity['short_name'],
-                        ]);
-                    }
-
-                    $changed = true;
+                    $changed = $this->ensureTeamIdentity($team, true);
                 }
 
                 if ($this->backfillPlayerNamesForTeam($team) > 0) {
@@ -183,7 +172,7 @@ class TeamProvisioningService
             throw new RuntimeException('No Liga 6 division found. Run baller:bootstrap-leagues first.');
         }
 
-        $identity = $this->generateTeamIdentity();
+        $identity = $this->generateTeamIdentity($user->id, 'U');
 
         $club = Club::create([
             'name' => $identity['club_name'],
@@ -202,6 +191,36 @@ class TeamProvisioningService
         ]);
     }
 
+    public function ensureTeamIdentity(Team $team, bool $force = false): bool
+    {
+        $team->loadMissing('club');
+
+        if (! $team->club) {
+            return false;
+        }
+
+        $teamNeedsRename = $force || $this->shouldRenameTeam($team, false);
+        $clubLooksLegacy = (bool) preg_match('/^(FC\sL\d[AB]-\d{2}|FC\sManager\s\d+)$/', $team->club->name);
+        $clubNeedsRename = $force || $clubLooksLegacy;
+
+        if (! $teamNeedsRename && ! $clubNeedsRename) {
+            return false;
+        }
+
+        $identity = $this->generateTeamIdentity((int) $team->id, 'T');
+
+        $team->update([
+            'name' => $identity['team_name'],
+        ]);
+
+        $team->club->update([
+            'name' => $identity['club_name'],
+            'short_name' => $identity['short_name'],
+        ]);
+
+        return true;
+    }
+
     private function shouldRenameTeam(Team $team, bool $forceTeamRename): bool
     {
         if ($forceTeamRename) {
@@ -214,20 +233,32 @@ class TeamProvisioningService
     /**
      * @return array{team_name: string, club_name: string, short_name: string}
      */
-    private function generateTeamIdentity(): array
+    private function generateTeamIdentity(int $seed, string $scope = 'T'): array
     {
-        $prefix = $this->teamPrefixes[array_rand($this->teamPrefixes)];
-        $city = $this->cityNames[array_rand($this->cityNames)];
-        $noun = $this->teamNouns[array_rand($this->teamNouns)];
+        $prefix = $this->pickFromPool($this->teamPrefixes, "{$scope}-{$seed}-prefix");
+        $city = $this->pickFromPool($this->cityNames, "{$scope}-{$seed}-city");
+        $noun = $this->pickFromPool($this->teamNouns, "{$scope}-{$seed}-noun");
 
-        $teamName = "{$prefix} {$city} {$noun}";
-        $clubName = "{$prefix} {$city}";
-        $shortName = strtoupper(substr($prefix, 0, 1).substr($city, 0, 2).substr($noun, 0, 1));
+        $identityToken = "{$scope}{$seed}";
+
+        $teamName = "{$prefix} {$city} {$noun} {$identityToken}";
+        $clubName = "{$prefix} {$city} {$identityToken}";
+        $shortName = strtoupper(substr($prefix, 0, 1).substr($city, 0, 2).substr($noun, 0, 1).substr((string) $seed, -2));
 
         return [
             'team_name' => $teamName,
             'club_name' => $clubName,
             'short_name' => substr($shortName, 0, 12),
         ];
+    }
+
+    /**
+     * @param string[] $pool
+     */
+    private function pickFromPool(array $pool, string $fingerprint): string
+    {
+        $index = abs((int) crc32($fingerprint)) % count($pool);
+
+        return $pool[$index];
     }
 }
