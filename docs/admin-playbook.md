@@ -38,6 +38,12 @@ php artisan route:cache
 php artisan view:cache
 ```
 
+6. Set the system cron to run Laravel scheduling every minute:
+
+```bash
+* * * * * cd /path/to/BallerSim && php artisan schedule:run >> /dev/null 2>&1
+```
+
 ## 2. League bootstrap (run once)
 
 Creates 6 leagues, 2 divisions each, CPU teams auto-filled.
@@ -66,6 +72,12 @@ Default (auto name and start date):
 php artisan baller:generate-season
 ```
 
+Automatic matchday runner:
+
+```bash
+php artisan baller:run-matchday
+```
+
 ## 4. Daily/after-deploy checks
 
 1. Routes are present:
@@ -80,10 +92,10 @@ php artisan route:list --path=my-team
 2. Key pages:
 - /
 - /login
-- /register
 - /dashboard
 - /my-team
 - /leagues
+- /spielplan
 - /transfer-market
 
 3. Waitlist storage file exists:

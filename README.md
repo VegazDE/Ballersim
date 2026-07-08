@@ -84,6 +84,7 @@ npm run build
 	- `php artisan queue:work --sleep=1 --tries=3 --timeout=120`
 	- `php artisan reverb:start`
 	- `php artisan schedule:run` minuetlich via Cron
+	- `baller:run-matchday` laeuft automatisch ueber den Scheduler zur konfigurierten Tageszeit
 
 ## Naechster Schritt (Step 2)
 
