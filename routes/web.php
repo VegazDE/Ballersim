@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\LeagueOverviewController;
 use App\Http\Controllers\TransferMarketController;
 use App\Http\Controllers\WaitlistSignupController;
 use Illuminate\Support\Facades\Route;
@@ -21,5 +22,6 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
 	Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 	Route::get('/dashboard', fn () => Inertia::render('Dashboard/Index'))->name('dashboard');
+	Route::get('/leagues', LeagueOverviewController::class)->name('leagues.index');
 	Route::get('/transfer-market', TransferMarketController::class)->name('transfer-market.index');
 });

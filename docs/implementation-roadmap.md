@@ -26,7 +26,7 @@
 - [x] Replace placeholder home with branded landing page
 - [ ] Run migrations on server
 - [ ] Run bootstrap command once on server
-- [ ] Build league index page with standings skeleton
+- [x] Build league index page with standings skeleton
 - [ ] Add season model and first season generator
 
 ## Bootstrap Command

@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import AppFrame from '../../Layouts/AppFrame.vue';
 
 const page = usePage();
 const user = page.props.auth?.user ?? null;
@@ -20,40 +21,8 @@ const submitWaitlist = () => {
 <template>
     <Head title="Baller Manager" />
 
-    <main class="min-h-screen bg-[linear-gradient(120deg,_#0f172a_0%,_#111827_40%,_#052e16_100%)] text-zinc-100">
-        <section class="mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-10 lg:py-14">
-            <header class="flex items-center justify-between rounded-2xl border border-emerald-400/25 bg-zinc-900/55 px-5 py-4 backdrop-blur">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.25em] text-emerald-300">Baller Manager</p>
-                    <p class="text-sm text-zinc-300">Real-time 6v6 League Management</p>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <Link
-                        v-if="!user"
-                        href="/login"
-                        class="rounded-lg border border-zinc-400/40 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:border-zinc-300"
-                    >
-                        Login
-                    </Link>
-                    <Link
-                        v-if="!user"
-                        href="/register"
-                        class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
-                    >
-                        Register
-                    </Link>
-                    <Link
-                        v-if="user"
-                        href="/dashboard"
-                        class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-emerald-400"
-                    >
-                        Open Dashboard
-                    </Link>
-                </div>
-            </header>
-
-            <section class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+    <AppFrame>
+        <section class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
                 <article class="rounded-3xl border border-emerald-300/30 bg-zinc-900/70 p-7 shadow-xl shadow-emerald-900/20 backdrop-blur lg:p-10">
                     <p class="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300">Season Kickoff</p>
                     <h1 class="mt-3 text-4xl font-black leading-tight tracking-tight text-zinc-100 lg:text-6xl">
@@ -105,9 +74,6 @@ const submitWaitlist = () => {
                             Drop your email and get notified as soon as league seasons, live matchdays, and public beta slots are available.
                         </p>
 
-                        <p v-if="flash.success" class="mt-4 rounded-lg border border-emerald-400/40 bg-emerald-500/15 px-4 py-3 text-sm font-medium text-emerald-200">
-                            {{ flash.success }}
-                        </p>
                     </div>
 
                     <form class="rounded-2xl border border-zinc-400/30 bg-zinc-950/45 p-5" @submit.prevent="submitWaitlist">
@@ -133,6 +99,5 @@ const submitWaitlist = () => {
                     </form>
                 </div>
             </section>
-        </section>
-    </main>
+    </AppFrame>
 </template>
