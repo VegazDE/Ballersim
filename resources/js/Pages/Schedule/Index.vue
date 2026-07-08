@@ -28,6 +28,8 @@ const localFilters = reactive({
     division_id: props.filters.division_id ?? null,
     team_id: props.filters.team_id ?? null,
     status: props.filters.status ?? null,
+    venue: props.filters.venue ?? null,
+    window_days: props.filters.window_days ?? null,
 });
 
 const selectedLeague = computed(() => {
@@ -95,6 +97,14 @@ const applyFilters = () => {
         query.status = localFilters.status;
     }
 
+    if (localFilters.venue) {
+        query.venue = localFilters.venue;
+    }
+
+    if (localFilters.window_days) {
+        query.window_days = localFilters.window_days;
+    }
+
     router.get('/spielplan', query, {
         preserveState: true,
         preserveScroll: true,
@@ -114,6 +124,8 @@ const onDivisionChange = () => {
 const resetToDefault = () => {
     localFilters.season_id = props.filters.season_id;
     localFilters.status = null;
+    localFilters.venue = null;
+    localFilters.window_days = null;
 
     if (props.default_team) {
         localFilters.league_id = props.default_team.league_id;
@@ -123,6 +135,34 @@ const resetToDefault = () => {
         localFilters.league_id = null;
         localFilters.division_id = null;
         localFilters.team_id = null;
+    }
+
+    applyFilters();
+};
+
+const setQuickFilter = (mode) => {
+    if (!props.default_team) {
+        return;
+    }
+
+    localFilters.league_id = props.default_team.league_id;
+    localFilters.division_id = props.default_team.division_id;
+    localFilters.team_id = props.default_team.id;
+    localFilters.status = null;
+
+    if (mode === 'home') {
+        localFilters.venue = 'home';
+        localFilters.window_days = null;
+    }
+
+    if (mode === 'away') {
+        localFilters.venue = 'away';
+        localFilters.window_days = null;
+    }
+
+    if (mode === 'next7') {
+        localFilters.venue = null;
+        localFilters.window_days = 7;
     }
 
     applyFilters();
@@ -143,7 +183,7 @@ const resetToDefault = () => {
         </section>
 
         <section class="rounded-2xl border border-zinc-400/30 bg-zinc-900/65 p-5 shadow-sm">
-            <div class="grid gap-4 md:grid-cols-5">
+            <div class="grid gap-4 md:grid-cols-7">
                 <label class="space-y-2 text-sm">
                     <span class="font-semibold text-zinc-200">Saison</span>
                     <select v-model="localFilters.season_id" class="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100">
@@ -191,6 +231,22 @@ const resetToDefault = () => {
                         <option v-for="statusOption in options.statuses" :key="statusOption" :value="statusOption">{{ statusOption }}</option>
                     </select>
                 </label>
+
+                <label class="space-y-2 text-sm">
+                    <span class="font-semibold text-zinc-200">Ort</span>
+                    <select v-model="localFilters.venue" class="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100">
+                        <option :value="null">Heim + Auswärts</option>
+                        <option v-for="venue in options.venues" :key="venue" :value="venue">{{ venue }}</option>
+                    </select>
+                </label>
+
+                <label class="space-y-2 text-sm">
+                    <span class="font-semibold text-zinc-200">Zeitraum</span>
+                    <select v-model="localFilters.window_days" class="w-full rounded-lg border border-zinc-600 bg-zinc-900 px-3 py-2 text-zinc-100">
+                        <option :value="null">Komplette Saison</option>
+                        <option v-for="windowOption in options.windows" :key="windowOption" :value="windowOption">Nächste {{ windowOption }} Tage</option>
+                    </select>
+                </label>
             </div>
 
             <div class="mt-4 flex flex-wrap gap-3">
@@ -207,6 +263,33 @@ const resetToDefault = () => {
                     @click="resetToDefault"
                 >
                     Zur Standardansicht
+                </button>
+
+                <button
+                    type="button"
+                    class="rounded-lg border border-emerald-500/60 px-4 py-2 text-sm font-semibold text-emerald-300 transition enabled:hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!hasOwnTeamDefault"
+                    @click="setQuickFilter('home')"
+                >
+                    Eigene Heimspiele
+                </button>
+
+                <button
+                    type="button"
+                    class="rounded-lg border border-emerald-500/60 px-4 py-2 text-sm font-semibold text-emerald-300 transition enabled:hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!hasOwnTeamDefault"
+                    @click="setQuickFilter('away')"
+                >
+                    Eigene Auswärtsspiele
+                </button>
+
+                <button
+                    type="button"
+                    class="rounded-lg border border-amber-500/60 px-4 py-2 text-sm font-semibold text-amber-300 transition enabled:hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="!hasOwnTeamDefault"
+                    @click="setQuickFilter('next7')"
+                >
+                    Eigene Spiele nächste 7 Tage
                 </button>
             </div>
         </section>

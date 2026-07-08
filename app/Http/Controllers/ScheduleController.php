@@ -6,6 +6,7 @@ use App\Models\Fixture;
 use App\Models\League;
 use App\Models\Season;
 use App\Models\Team;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -26,8 +27,18 @@ class ScheduleController extends Controller
         $divisionId = $request->integer('division_id') ?: null;
         $teamId = $request->integer('team_id') ?: null;
         $status = $request->string('status')->toString();
+        $venue = $request->string('venue')->toString();
+        $windowDays = $request->integer('window_days') ?: null;
 
-        $hasQueryFilters = collect($request->only(['season_id', 'league_id', 'division_id', 'team_id', 'status']))
+        if (! in_array($venue, ['', 'home', 'away'], true)) {
+            $venue = '';
+        }
+
+        if ($windowDays !== null) {
+            $windowDays = max(1, min(30, $windowDays));
+        }
+
+        $hasQueryFilters = collect($request->only(['season_id', 'league_id', 'division_id', 'team_id', 'status', 'venue', 'window_days']))
             ->contains(static fn ($value): bool => $value !== null && $value !== '');
 
         if (! $hasQueryFilters && $managerTeam) {
@@ -53,10 +64,16 @@ class ScheduleController extends Controller
             ->when($seasonId !== null, fn ($query) => $query->where('season_id', $seasonId))
             ->when($leagueId !== null, fn ($query) => $query->where('league_id', $leagueId))
             ->when($divisionId !== null, fn ($query) => $query->where('division_id', $divisionId))
-            ->when($teamId !== null, fn ($query) => $query->where(static function ($inner) use ($teamId): void {
+            ->when($teamId !== null && $venue === 'home', fn ($query) => $query->where('home_team_id', $teamId))
+            ->when($teamId !== null && $venue === 'away', fn ($query) => $query->where('away_team_id', $teamId))
+            ->when($teamId !== null && $venue === '', fn ($query) => $query->where(static function ($inner) use ($teamId): void {
                 $inner->where('home_team_id', $teamId)->orWhere('away_team_id', $teamId);
             }))
             ->when($status !== '', fn ($query) => $query->where('status', $status))
+            ->when($windowDays !== null, fn ($query) => $query->whereBetween('kickoff_at', [
+                Carbon::now()->startOfDay(),
+                Carbon::now()->addDays($windowDays)->endOfDay(),
+            ]))
             ->orderBy('kickoff_at')
             ->orderBy('matchday')
             ->orderBy('id');
@@ -148,6 +165,8 @@ class ScheduleController extends Controller
                 'division_id' => $divisionId,
                 'team_id' => $teamId,
                 'status' => $status !== '' ? $status : null,
+                'venue' => $venue !== '' ? $venue : null,
+                'window_days' => $windowDays,
             ],
             'options' => [
                 'seasons' => $seasons,
@@ -157,6 +176,8 @@ class ScheduleController extends Controller
                     Fixture::STATUS_LIVE,
                     Fixture::STATUS_FINISHED,
                 ],
+                'venues' => ['home', 'away'],
+                'windows' => [3, 7, 14],
             ],
             'default_team' => $managerTeam ? [
                 'id' => $managerTeam->id,
