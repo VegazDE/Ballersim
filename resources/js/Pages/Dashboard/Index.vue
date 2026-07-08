@@ -4,6 +4,13 @@ import AppFrame from '../../Layouts/AppFrame.vue';
 
 const page = usePage();
 const user = page.props.auth?.user;
+
+defineProps({
+    team: {
+        type: Object,
+        default: null,
+    },
+});
 </script>
 
 <template>
@@ -23,6 +30,10 @@ const user = page.props.auth?.user;
                     <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300">Progress</p>
                     <p class="mt-2 text-lg font-bold text-zinc-100">League bootstrap complete</p>
                     <p class="mt-2 text-sm text-zinc-300">6 leagues and 2 divisions each are ready for season logic.</p>
+                    <p v-if="team" class="mt-3 text-sm text-emerald-300">Assigned team: {{ team.name }}</p>
+                    <Link href="/my-team" class="mt-3 inline-block text-sm font-semibold text-emerald-300 hover:text-emerald-200">
+                        Open team profile
+                    </Link>
                 </article>
 
                 <article class="rounded-xl border border-zinc-400/30 bg-zinc-900/65 p-5 shadow-sm">

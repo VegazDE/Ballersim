@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\TeamProvisioningService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,10 @@ use Inertia\Response;
 
 class RegisteredUserController extends Controller
 {
+    public function __construct(private readonly TeamProvisioningService $teamProvisioning)
+    {
+    }
+
     public function create(): Response
     {
         return Inertia::render('Auth/Register');
@@ -34,6 +39,8 @@ class RegisteredUserController extends Controller
         ]);
 
         event(new Registered($user));
+
+        $this->teamProvisioning->assignTeamToManager($user);
 
         Auth::login($user);
 

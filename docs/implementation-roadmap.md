@@ -24,6 +24,9 @@
 - [x] Add one-time bootstrap command for 6 leagues x 2 divisions
 - [x] Add auth flow (register, login, logout, dashboard)
 - [x] Replace placeholder home with branded landing page
+- [x] Add team profile page and player profile page
+- [x] Auto-assign new managers to Liga 6 team
+- [x] Add team/player identity generation commands
 - [ ] Run migrations on server
 - [ ] Run bootstrap command once on server
 - [x] Build league index page with standings skeleton

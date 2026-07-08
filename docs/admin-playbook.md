@@ -74,6 +74,7 @@ php artisan baller:generate-season
 php artisan route:list --path=leagues
 php artisan route:list --path=transfer-market
 php artisan route:list --path=dashboard
+php artisan route:list --path=my-team
 ```
 
 2. Key pages:
@@ -81,6 +82,7 @@ php artisan route:list --path=dashboard
 - /login
 - /register
 - /dashboard
+- /my-team
 - /leagues
 - /transfer-market
 
@@ -118,3 +120,23 @@ npm run build
 6. Tactics and lineups
 7. Transfer and draft integration
 8. Promotion/relegation and season rollover
+
+## 7. Team and player identities
+
+Backfill rosters if needed:
+
+```bash
+php artisan baller:seed-team-players --target=10
+```
+
+Generate missing team and player names:
+
+```bash
+php artisan baller:generate-identities
+```
+
+Force rename all team names:
+
+```bash
+php artisan baller:generate-identities --force-team-rename
+```

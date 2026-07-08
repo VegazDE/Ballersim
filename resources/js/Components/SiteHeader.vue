@@ -10,6 +10,7 @@ const navLinks = computed(() => {
     if (user.value) {
         return [
             { label: 'Dashboard', href: '/dashboard' },
+            { label: 'My Team', href: '/my-team' },
             { label: 'Leagues', href: '/leagues' },
             { label: 'Transfer Market', href: '/transfer-market' },
         ];

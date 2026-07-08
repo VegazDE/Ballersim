@@ -6,6 +6,7 @@ use App\Models\Fixture;
 use App\Models\League;
 use App\Models\Season;
 use App\Models\Team;
+use App\Services\TeamProvisioningService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -17,6 +18,7 @@ Artisan::command('inspire', function () {
 
 Artisan::command('baller:bootstrap-leagues {--teams-per-division=12}', function (): int {
     $teamsPerDivision = (int) $this->option('teams-per-division');
+    $teamProvisioning = app(TeamProvisioningService::class);
 
     if ($teamsPerDivision < 2) {
         $this->error('teams-per-division must be at least 2.');
@@ -57,7 +59,7 @@ Artisan::command('baller:bootstrap-leagues {--teams-per-division=12}', function 
                         'budget' => 1000000,
                     ]);
 
-                    Team::create([
+                    $team = Team::create([
                         'club_id' => $club->id,
                         'league_id' => $league->id,
                         'division_id' => $division->id,
@@ -66,6 +68,8 @@ Artisan::command('baller:bootstrap-leagues {--teams-per-division=12}', function 
                         'is_cpu' => true,
                         'division_name' => $division->name,
                     ]);
+
+                    $teamProvisioning->seedPlayersForTeam($team);
                 }
             }
         }
@@ -75,6 +79,27 @@ Artisan::command('baller:bootstrap-leagues {--teams-per-division=12}', function 
 
     return self::SUCCESS;
 })->purpose('Create 6 leagues with 2 divisions each and auto-fill teams once.');
+
+Artisan::command('baller:seed-team-players {--target=10}', function (): int {
+    $target = max(6, (int) $this->option('target'));
+    $teamProvisioning = app(TeamProvisioningService::class);
+    $seededTeams = $teamProvisioning->seedPlayersForAllTeams($target);
+
+    $this->info("Player seeding completed. Updated {$seededTeams} teams.");
+
+    return self::SUCCESS;
+})->purpose('Backfill players for teams with fewer than target roster size.');
+
+Artisan::command('baller:generate-identities {--force-team-rename}', function (): int {
+    $teamProvisioning = app(TeamProvisioningService::class);
+
+    $seededTeams = $teamProvisioning->seedPlayersForAllTeams(10);
+    $updatedTeams = $teamProvisioning->backfillTeamAndPlayerNames((bool) $this->option('force-team-rename'));
+
+    $this->info("Identity generation done. Seeded players for {$seededTeams} teams, updated names for {$updatedTeams} teams.");
+
+    return self::SUCCESS;
+})->purpose('Generate or backfill team and player names for existing data.');
 
 Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-interval-days=7}', function (): int {
     $divisionCount = Division::query()->count();
