@@ -27,7 +27,21 @@
 - [ ] Run migrations on server
 - [ ] Run bootstrap command once on server
 - [x] Build league index page with standings skeleton
-- [ ] Add season model and first season generator
+- [x] Add season model and first season generator
+
+## Season Generator Command
+
+Create next season with automatic home and away fixtures for all divisions:
+
+```bash
+php artisan baller:generate-season
+```
+
+Optional season name and start date:
+
+```bash
+php artisan baller:generate-season "Season 1" --start-date=2026-08-01
+```
 
 ## Bootstrap Command
 

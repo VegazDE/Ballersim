@@ -6,30 +6,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class League extends Model
+class Season extends Model
 {
     use HasFactory;
 
+    public const STATUS_PLANNED = 'planned';
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_FINISHED = 'finished';
+
     protected $fillable = [
         'name',
-        'key',
-        'level',
-        'is_top_tier',
+        'season_number',
+        'status',
+        'starts_at',
+        'ends_at',
+        'match_duration_minutes',
     ];
 
     protected $casts = [
-        'is_top_tier' => 'boolean',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
     ];
-
-    public function divisions(): HasMany
-    {
-        return $this->hasMany(Division::class);
-    }
-
-    public function teams(): HasMany
-    {
-        return $this->hasMany(Team::class);
-    }
 
     public function fixtures(): HasMany
     {

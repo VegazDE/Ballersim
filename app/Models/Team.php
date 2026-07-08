@@ -54,4 +54,14 @@ class Team extends Model
     {
         return $this->hasMany(TransferListing::class, 'seller_team_id');
     }
+
+    public function homeFixtures(): HasMany
+    {
+        return $this->hasMany(Fixture::class, 'home_team_id');
+    }
+
+    public function awayFixtures(): HasMany
+    {
+        return $this->hasMany(Fixture::class, 'away_team_id');
+    }
 }
