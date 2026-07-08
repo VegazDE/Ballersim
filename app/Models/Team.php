@@ -33,6 +33,7 @@ class Team extends Model
         'tempo' => 'integer',
         'substitution_style' => 'integer',
         'line_height' => 'integer',
+        'starting_lineup' => 'array',
     ];
 
     public function club(): BelongsTo

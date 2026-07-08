@@ -173,9 +173,39 @@ class MatchSimulationService
         $slots = $this->formationSlots($formation);
         $usedIds = [];
         $lineup = [];
+        $manualLineupIds = collect($team?->starting_lineup ?? [])
+            ->filter()
+            ->map(fn ($playerId) => (int) $playerId)
+            ->unique()
+            ->values()
+            ->all();
+
+        $manualPlayers = collect($manualLineupIds)
+            ->map(fn (int $playerId) => $players->firstWhere('id', $playerId))
+            ->filter()
+            ->values();
+
+        foreach ($manualPlayers as $player) {
+            if (in_array($player->id, $usedIds, true)) {
+                continue;
+            }
+
+            $lineup[] = $this->formatPlayerSlot($player, $this->normalizePosition($player->primary_position), true);
+            $usedIds[] = $player->id;
+        }
 
         foreach ($slots as $role => $count) {
+            $roleTargetCount = $count;
+
+            if ($role === 'GK' && collect($lineup)->contains('role', 'GK')) {
+                $roleTargetCount = max(0, $count - 1);
+            }
+
             for ($index = 0; $index < $count; $index++) {
+                if ($role === 'GK' && collect($lineup)->contains('role', 'GK') && $index === 0) {
+                    continue;
+                }
+
                 $player = $this->pickBestPlayerForRole($players, $usedIds, $role);
 
                 if ($player) {
@@ -185,6 +215,20 @@ class MatchSimulationService
                 }
 
                 $lineup[] = $this->formatPlaceholderSlot($role);
+            }
+        }
+
+        if (count($lineup) > 11) {
+            $lineup = array_slice($lineup, 0, 11);
+        }
+
+        if (count($lineup) < 11) {
+            $fillCandidates = $players->reject(fn ($player) => in_array($player->id, $usedIds, true))->values();
+
+            while (count($lineup) < 11 && $fillCandidates->isNotEmpty()) {
+                $player = $fillCandidates->shift();
+                $lineup[] = $this->formatPlayerSlot($player, $this->normalizePosition($player->primary_position), true);
+                $usedIds[] = $player->id;
             }
         }
 

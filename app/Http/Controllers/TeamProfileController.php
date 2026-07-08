@@ -34,6 +34,13 @@ class TeamProfileController extends Controller
                 'league' => $team->league?->name,
                 'division' => $team->division?->name,
                 'budget' => $team->club?->budget,
+                'formation' => $team->formation ?? '4-3-3',
+                'mentality' => $team->mentality ?? 'balanced',
+                'pressing' => $team->pressing ?? 50,
+                'tempo' => $team->tempo ?? 50,
+                'substitution_style' => $team->substitution_style ?? 50,
+                'line_height' => $team->line_height ?? 50,
+                'starting_lineup' => $team->starting_lineup ?? [],
             ],
             'players' => $team->players->map(static fn ($player): array => [
                 'id' => $player->id,

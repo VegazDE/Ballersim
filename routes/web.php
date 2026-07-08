@@ -8,6 +8,7 @@ use App\Http\Controllers\LeagueOverviewController;
 use App\Http\Controllers\PlayerProfileController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\TeamProfileController;
+use App\Http\Controllers\TeamSettingsController;
 use App\Http\Controllers\TeamShowController;
 use App\Http\Controllers\TransferMarketController;
 use App\Http\Controllers\WaitlistSignupController;
@@ -28,6 +29,7 @@ Route::middleware('auth')->group(function (): void {
 	Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 	Route::get('/dashboard', DashboardController::class)->name('dashboard');
 	Route::get('/my-team', TeamProfileController::class)->name('team.profile');
+	Route::post('/my-team/settings', TeamSettingsController::class)->name('team.settings.update');
 	Route::get('/my-team/players/{player}', PlayerProfileController::class)->name('player.profile');
 	Route::get('/leagues', LeagueOverviewController::class)->name('leagues.index');
 	Route::get('/leagues/{league}', LeagueShowController::class)->name('leagues.show');
