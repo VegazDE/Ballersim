@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppFrame from '../../Layouts/AppFrame.vue';
 
 defineProps({
@@ -29,7 +29,11 @@ defineProps({
                 <div class="mb-4 flex items-center justify-between">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-zinc-300">Tier {{ league.level }}</p>
-                        <h2 class="text-2xl font-bold tracking-tight text-zinc-100">{{ league.name }}</h2>
+                        <h2 class="text-2xl font-bold tracking-tight text-zinc-100">
+                            <Link :href="`/leagues/${league.id}`" class="text-emerald-300 hover:text-emerald-200">
+                                {{ league.name }}
+                            </Link>
+                        </h2>
                     </div>
                     <p class="rounded-full border border-zinc-400/35 px-3 py-1 text-sm font-semibold text-zinc-200">
                         {{ league.teams_count }} teams
@@ -48,7 +52,11 @@ defineProps({
                         </thead>
                         <tbody class="divide-y divide-zinc-800">
                             <tr v-for="division in league.divisions" :key="division.id" class="bg-zinc-900/45 text-zinc-100">
-                                <td class="px-4 py-3 font-semibold">{{ division.name }}</td>
+                                <td class="px-4 py-3 font-semibold">
+                                    <Link :href="`/leagues/${league.id}/divisions/${division.id}`" class="text-emerald-300 hover:text-emerald-200">
+                                        {{ division.name }}
+                                    </Link>
+                                </td>
                                 <td class="px-4 py-3">{{ division.code }}</td>
                                 <td class="px-4 py-3">{{ division.teams_count }}</td>
                                 <td class="px-4 py-3">{{ division.teams_target }}</td>

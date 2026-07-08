@@ -101,7 +101,7 @@ Artisan::command('baller:generate-identities {--force-team-rename}', function ()
     return self::SUCCESS;
 })->purpose('Generate or backfill team and player names for existing data.');
 
-Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-interval-days=7}', function (): int {
+Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-interval-days=1}', function (): int {
     $divisionCount = Division::query()->count();
 
     if ($divisionCount === 0) {
@@ -127,9 +127,10 @@ Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-int
         'match_duration_minutes' => (int) config('baller_manager.match_duration_minutes', 7),
     ]);
 
+    $slotSpacingMinutes = max(8, ((int) $season->match_duration_minutes) + 2);
     $totalFixtures = 0;
 
-    DB::transaction(function () use ($season, $startsAt, $intervalDays, &$totalFixtures): void {
+    DB::transaction(function () use ($season, $startsAt, $intervalDays, $slotSpacingMinutes, &$totalFixtures): void {
         $divisions = Division::query()->with('teams:id,division_id,league_id')->orderBy('id')->get();
 
         foreach ($divisions as $division) {
@@ -164,6 +165,9 @@ Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-int
                         [$homeId, $awayId] = [$awayId, $homeId];
                     }
 
+                    $firstLegSlotKickoff = $firstLegKickoff->copy()->addMinutes($slot * $slotSpacingMinutes);
+                    $secondLegSlotKickoff = $secondLegKickoff->copy()->addMinutes($slot * $slotSpacingMinutes);
+
                     Fixture::create([
                         'season_id' => $season->id,
                         'league_id' => $division->league_id,
@@ -172,7 +176,7 @@ Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-int
                         'leg' => 1,
                         'home_team_id' => $homeId,
                         'away_team_id' => $awayId,
-                        'kickoff_at' => $firstLegKickoff,
+                        'kickoff_at' => $firstLegSlotKickoff,
                         'status' => Fixture::STATUS_SCHEDULED,
                     ]);
 
@@ -184,7 +188,7 @@ Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-int
                         'leg' => 2,
                         'home_team_id' => $awayId,
                         'away_team_id' => $homeId,
-                        'kickoff_at' => $secondLegKickoff,
+                        'kickoff_at' => $secondLegSlotKickoff,
                         'status' => Fixture::STATUS_SCHEDULED,
                     ]);
 
@@ -198,7 +202,7 @@ Artisan::command('baller:generate-season {name?} {--start-date=} {--matchday-int
         }
     });
 
-    $this->info("Created {$season->name} with {$totalFixtures} fixtures.");
+    $this->info("Created {$season->name} with {$totalFixtures} fixtures ({$intervalDays} day(s) between matchdays).");
 
     return self::SUCCESS;
-})->purpose('Generate a full home/away season schedule for all divisions.');
+})->purpose('Generate a full home/away season schedule for all divisions (default: one matchday per day).');

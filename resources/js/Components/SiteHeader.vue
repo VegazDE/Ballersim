@@ -12,6 +12,7 @@ const navLinks = computed(() => {
             { label: 'Dashboard', href: '/dashboard' },
             { label: 'My Team', href: '/my-team' },
             { label: 'Leagues', href: '/leagues' },
+            { label: 'Spielplan', href: '/spielplan' },
             { label: 'Transfer Market', href: '/transfer-market' },
         ];
     }
