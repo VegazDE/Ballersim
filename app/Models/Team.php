@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Team extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'club_id',
+        'manager_user_id',
+        'league_id',
+        'division_id',
+        'name',
+        'is_cpu',
+        'division_name',
+    ];
+
+    protected $casts = [
+        'is_cpu' => 'boolean',
+    ];
+
+    public function club(): BelongsTo
+    {
+        return $this->belongsTo(Club::class);
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_user_id');
+    }
+
+    public function league(): BelongsTo
+    {
+        return $this->belongsTo(League::class);
+    }
+
+    public function division(): BelongsTo
+    {
+        return $this->belongsTo(Division::class);
+    }
+
+    public function players(): HasMany
+    {
+        return $this->hasMany(Player::class);
+    }
+
+    public function listings(): HasMany
+    {
+        return $this->hasMany(TransferListing::class, 'seller_team_id');
+    }
+}
