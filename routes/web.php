@@ -3,10 +3,12 @@
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\TransferMarketController;
+use App\Http\Controllers\WaitlistSignupController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', fn () => Inertia::render('Home/Index'))->name('home');
+Route::post('/waitlist', WaitlistSignupController::class)->name('waitlist.store');
 
 Route::middleware('guest')->group(function (): void {
 	Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
