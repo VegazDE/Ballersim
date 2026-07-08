@@ -22,6 +22,8 @@
 - [x] Add league and division data model
 - [x] Add league_id and division_id to teams
 - [x] Add one-time bootstrap command for 6 leagues x 2 divisions
+- [x] Add auth flow (register, login, logout, dashboard)
+- [x] Replace placeholder home with branded landing page
 - [ ] Run migrations on server
 - [ ] Run bootstrap command once on server
 - [ ] Build league index page with standings skeleton

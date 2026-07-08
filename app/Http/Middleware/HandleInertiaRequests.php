@@ -21,6 +21,12 @@ class HandleInertiaRequests extends Middleware
             'appName' => config('app.name'),
             'matchDurationMinutes' => (int) config('baller_manager.match_duration_minutes'),
             'domain' => config('baller_manager.primary_domain'),
+            'auth' => [
+                'user' => $request->user()?->only(['id', 'name', 'email']),
+            ],
+            'flash' => [
+                'success' => $request->session()->get('success'),
+            ],
         ];
     }
 }
